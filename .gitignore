@@ -3,3 +3,7 @@
 
 .vagrant/
 htmlcov/
+
+.idea/
+.DS_Store
+.Vagrantfile.swp
