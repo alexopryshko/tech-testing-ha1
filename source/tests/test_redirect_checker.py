@@ -35,7 +35,7 @@ class RedirectCheckerTestCase(unittest.TestCase):
     @mock.patch('source.redirect_checker.main_loop_function')
     def test_main_loop(self, m_main_loop_function):
         with mock.patch('source.redirect_checker.sleep', mock.Mock(side_effect=break_while)):
-            redirect_checker.main([1, 2, 3, 4])
+            redirect_checker.main([1])
         self.assertTrue(m_main_loop_function.called)
 
     @mock.patch('source.redirect_checker.worker', mock.Mock())
