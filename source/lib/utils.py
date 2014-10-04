@@ -37,6 +37,12 @@ def create_pidfile(pidfile_path):
         f.write(pid)
 
 
+def execfile_ret(file_path):
+    variables = {}
+    execfile(file_path, variables)
+    return variables
+
+
 def load_config_from_pyfile(filepath):
     """
     Создает Config объект из py файла и загружает в него настройки.
@@ -52,7 +58,8 @@ def load_config_from_pyfile(filepath):
 
     variables = {}
 
-    execfile(filepath, variables)
+    #execfile(filepath, variables)
+    variables = execfile_ret(filepath)
 
     for key, value in variables.iteritems():
         if key.isupper():
