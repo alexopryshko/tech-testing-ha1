@@ -13,32 +13,37 @@ from lib.worker import worker
 
 logger = logging.getLogger('redirect_checker')
 
+keep_running = True
 
-def main_loop(config):
-    logger.info(
-        u'Run main loop. Worker pool size={}. Sleep time is {}.'.format(
-            config.WORKER_POOL_SIZE, config.SLEEP
-        ))
-    parent_pid = os.getpid()
-    while True:
-        if check_network_status(config.CHECK_URL, config.HTTP_TIMEOUT):
-            required_workers_count = config.WORKER_POOL_SIZE - len(
-                active_children())
-            if required_workers_count > 0:
-                logger.info(
-                    'Spawning {} workers'.format(required_workers_count))
-                spawn_workers(
-                    num=required_workers_count,
-                    target=worker,
-                    args=(config,),
-                    parent_pid=parent_pid
-                )
-        else:
-            logger.critical('Network is down. stopping workers')
-            for c in active_children():
-                c.terminate()
 
-        sleep(config.SLEEP)
+def main_loop_function(config, parent_pid):
+    if check_network_status(config.CHECK_URL, config.HTTP_TIMEOUT):
+        required_workers_count = config.WORKER_POOL_SIZE - len(
+            active_children())
+        if required_workers_count > 0:
+            logger.info(
+                'Spawning {} workers'.format(required_workers_count))
+            spawn_workers(
+                num=required_workers_count,
+                target=worker,
+                args=(config,),
+                parent_pid=parent_pid
+            )
+    else:
+        logger.critical('Network is down. stopping workers')
+        for c in active_children():
+            c.terminate()
+
+
+#def main_loop(config):
+#    logger.info(
+#        u'Run main loop. Worker pool size={}. Sleep time is {}.'.format(
+#            config.WORKER_POOL_SIZE, config.SLEEP
+#        ))
+#    parent_pid = os.getpid()
+#    while True:
+#        main_loop_function(config, parent_pid)
+#        sleep(config.SLEEP)
 
 
 def main(argv):
@@ -54,7 +59,15 @@ def main(argv):
         os.path.realpath(os.path.expanduser(args.config))
     )
     dictConfig(config.LOGGING)
-    main_loop(config)
+    #main_loop(config)
+    logger.info(
+        u'Run main loop. Worker pool size={}. Sleep time is {}.'.format(
+            config.WORKER_POOL_SIZE, config.SLEEP
+        ))
+    parent_pid = os.getpid()
+    while keep_running:
+        main_loop_function(config, parent_pid)
+        sleep(config.SLEEP)
 
     return config.EXIT_CODE
 
