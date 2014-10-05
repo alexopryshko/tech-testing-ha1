@@ -64,7 +64,6 @@ class LibUtilsCase(unittest.TestCase):
         m_open.assert_called_once_with('/file/path', 'w')
         m_open().write.assert_called_once_with(str(pid))
 
-    #TODO load_config_from_pyfile
     def test_load_config_from_pyfile(self):
         config = Config()
         config.TEST = 1
