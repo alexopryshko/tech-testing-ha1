@@ -10,6 +10,7 @@ sys.path.insert(0, source_dir)
 from tests.test_notification_pusher import NotificationPusherTestCase
 from tests.test_redirect_checker import RedirectCheckerTestCase
 from tests.test_lib_utils import LibUtilsCase
+from tests.test_lib_worker import LibWorkerCase
 
 
 if __name__ == '__main__':
@@ -17,6 +18,7 @@ if __name__ == '__main__':
         unittest.makeSuite(NotificationPusherTestCase),
         unittest.makeSuite(RedirectCheckerTestCase),
         unittest.makeSuite(LibUtilsCase),
+        unittest.makeSuite(LibWorkerCase),
     ))
     result = unittest.TextTestRunner().run(suite)
     sys.exit(not result.wasSuccessful())
