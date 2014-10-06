@@ -90,7 +90,8 @@ def done_with_processed_tasks(task_queue):
                 getattr(task, action_name)()
             except tarantool.DatabaseError as exc:
                 logger.exception(exc)
-        except gevent_queue.Empty:
+        except gevent_queue.Empty as exc:
+            logger.debug(exc)
             break
 
 
