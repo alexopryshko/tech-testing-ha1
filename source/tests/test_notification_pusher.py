@@ -11,30 +11,7 @@ class MockConfig:
         return self.field
 
 
-def stop(*args, **kwargs):
-    import source.notification_pusher as notification_pusher
-    notification_pusher.run_application = False
-
-
 class NotificationPusherTestCase(unittest.TestCase):
-    def setUp(self):
-        import source.notification_pusher as notification_pusher
-        #notification_pusher.run_application = True
-        from lib.utils import Config
-        self.config = Config()
-        self.config.QUEUE_HOST = 'localhost'
-        self.config.QUEUE_PORT = 33013
-        self.config.QUEUE_SPACE = 0
-        self.config.QUEUE_TAKE_TIMEOUT = 0.1
-        self.config.QUEUE_TUBE = 'api.push_notifications'
-
-        self.config.HTTP_CONNECTION_TIMEOUT = 30
-        self.config.SLEEP = 0.1
-        self.config.SLEEP_ON_FAIL = 10
-
-        self.config.WORKER_POOL_SIZE = 1
-        notification_pusher.sleep = mock.Mock(side_effect=stop)
-
     @mock.patch('source.notification_pusher.current_thread', mock.Mock())
     @mock.patch('source.notification_pusher.requests.post', mock.Mock(return_value=mock.Mock()))
     @mock.patch('source.notification_pusher.json.dumps', mock.Mock())
