@@ -28,8 +28,8 @@ class LibInitCase(unittest.TestCase):
             with mock.patch('pycurl.Curl', mock.Mock(return_value=m_curl)):
                 content, redirect_url = make_pycurl_request('url', 11, useragent)
 
-        self.assertEqual(content, 'test', 'Wrong content')
-        self.assertEqual('url', redirect_url, 'Wrong redirect url')
+        self.assertEqual(content, 'test')
+        self.assertEqual('url', redirect_url)
 
     def test_make_pycurl_request(self):
         self._test_make_pycurl_request(None)
@@ -40,6 +40,21 @@ class LibInitCase(unittest.TestCase):
 
         m_curl.setopt.assert_any_call(m_curl.USERAGENT, 'mozilla')
 
+    def test_make_pycurl_redirect(self):
+        m_curl = mock.MagicMock()
+        m_buffer = mock.MagicMock()
+        m_buffer.getvalue = mock.Mock(return_value='test')
+
+        m_curl.getinfo = mock.Mock(return_value=None)
+
+        with mock.patch('source.lib.StringIO', mock.Mock(return_value=m_buffer)):
+            with mock.patch('pycurl.Curl', mock.Mock(return_value=m_curl)):
+                content, redirect_url = make_pycurl_request('url', 11, '')
+
+        self.assertEqual(content, 'test')
+        self.assertEqual(None, redirect_url)
+
+
     def test_fix_market_url(self):
         result = fix_market_url('market://test/app')
         self.assertEqual('http://play.google.com/store/apps/test/app', result)
@@ -47,12 +62,17 @@ class LibInitCase(unittest.TestCase):
     def test_get_url_http(self):
         m_redirect_url = 'index.html'
         m_redirect_type = REDIRECT_HTTP
-
         with mock.patch('source.lib.make_pycurl_request', mock.Mock(return_value=('<html></html>', m_redirect_url))):
             redirect_url, redirect_type, content = get_url('http://tech-mail.ru', 11)
 
             self.assertEquals(m_redirect_url, redirect_url)
             self.assertEquals(m_redirect_type, redirect_type)
+
+    def test_get_url_redirect_none(self):
+        with mock.patch('source.lib.make_pycurl_request', mock.Mock(return_value=('<html></html>', None))):
+            redirect_url, redirect_type, content = get_url('http://tech-mail.ru', 11)
+
+            self.assertEquals(redirect_type, None)
 
     def test_get_counters(self):
         page = str()
