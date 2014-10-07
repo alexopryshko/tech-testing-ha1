@@ -11,7 +11,20 @@ from source.lib.utils import daemonize, \
     spawn_workers, \
     check_network_status, \
     Config, \
-    load_config_from_pyfile
+    load_config_from_pyfile, \
+    configuration
+
+
+class MockConfig:
+    def __init__(self):
+        self.field = mock.Mock()
+
+    def __getattr__(self, item):
+        return self.field
+
+
+class Args(object):
+    pass
 
 
 class LibUtilsCase(unittest.TestCase):
@@ -106,6 +119,53 @@ class LibUtilsCase(unittest.TestCase):
     @mock.patch('source.lib.utils.urllib2.urlopen', mock.Mock(side_effect=ValueError("error")))
     def test_check_network_status_value_error(self):
         self.assertFalse(check_network_status(None, None))
+
+    @mock.patch('source.lib.utils.os.path.realpath', mock.Mock())
+    @mock.patch('source.lib.utils.os.path.expanduser', mock.Mock())
+    def test_configuration_with_out_argv(self):
+        args = Args()
+        args.daemon = False
+        args.pidfile = None
+        args.config = mock.Mock()
+        with mock.patch('source.lib.utils.load_config_from_pyfile', mock.Mock(return_value={})):
+            with mock.patch('source.lib.utils.daemonize', mock.Mock()) as m_daemonize:
+                with mock.patch('source.lib.utils.create_pidfile', mock.Mock()) as m_create_pidfile:
+                    configuration(args)
+        self.assertEqual(m_daemonize.called, False)
+        self.assertEqual(m_create_pidfile.called, False)
+
+    @mock.patch('source.lib.utils.os.path.realpath', mock.Mock())
+    @mock.patch('source.lib.utils.os.path.expanduser', mock.Mock())
+    def test_configuration_with_daemon_argv(self):
+        args = Args()
+        args.daemon = True
+        args.pidfile = None
+        args.config = mock.Mock()
+        with mock.patch('source.lib.utils.load_config_from_pyfile', mock.Mock(return_value={})):
+            with mock.patch('source.lib.utils.daemonize', mock.Mock()) as m_daemonize:
+                with mock.patch('source.lib.utils.create_pidfile', mock.Mock()) as m_create_pidfile:
+                    configuration(args)
+        self.assertEqual(m_daemonize.called, True)
+        self.assertEqual(m_create_pidfile.called, False)
+
+    @mock.patch('source.lib.utils.os.path.realpath', mock.Mock())
+    @mock.patch('source.lib.utils.os.path.expanduser', mock.Mock())
+    def test_configuration_with_pidfile_argv(self):
+        args = Args()
+        args.daemon = False
+        args.pidfile = './source/config/pusher_config.py'
+        args.config = mock.Mock()
+        with mock.patch('source.lib.utils.load_config_from_pyfile', mock.Mock(return_value={})):
+            with mock.patch('source.lib.utils.daemonize', mock.Mock()) as m_daemonize:
+                with mock.patch('source.lib.utils.create_pidfile', mock.Mock()) as m_create_pidfile:
+                    configuration(args)
+        self.assertEqual(m_daemonize.called, False)
+        self.assertEqual(m_create_pidfile.called, True)
+
+
+
+
+
 
 
 

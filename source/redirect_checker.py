@@ -8,7 +8,7 @@ from multiprocessing import active_children
 from time import sleep
 
 from lib.utils import (check_network_status, create_pidfile, daemonize,
-                       load_config_from_pyfile, parse_cmd_args, spawn_workers)
+                       load_config_from_pyfile, parse_cmd_args, spawn_workers, configuration)
 from lib.worker import worker
 
 logger = logging.getLogger('redirect_checker')
@@ -48,18 +48,9 @@ def main_loop_function(config, parent_pid):
 
 def main(argv):
     args = parse_cmd_args(argv[1:])
+    config = configuration(args)
 
-    if args.daemon:
-        daemonize()
-
-    if args.pidfile:
-        create_pidfile(args.pidfile)
-
-    config = load_config_from_pyfile(
-        os.path.realpath(os.path.expanduser(args.config))
-    )
     dictConfig(config.LOGGING)
-    #main_loop(config)
     logger.info(
         u'Run main loop. Worker pool size={}. Sleep time is {}.'.format(
             config.WORKER_POOL_SIZE, config.SLEEP

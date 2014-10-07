@@ -24,13 +24,12 @@ class ActiveChildren:
 class RedirectCheckerTestCase(unittest.TestCase):
 
     @mock.patch('os.getpid', mock.Mock(return_value=10))
-    @mock.patch('os.path.realpath', mock.Mock())
-    @mock.patch('os.path.expanduser', mock.Mock())
     @mock.patch('source.redirect_checker.keep_running', mock.Mock())
     @mock.patch('source.redirect_checker.daemonize', mock.Mock())
     @mock.patch('source.redirect_checker.create_pidfile', mock.Mock())
     @mock.patch('source.redirect_checker.load_config_from_pyfile', mock.Mock())
     @mock.patch('source.redirect_checker.parse_cmd_args', mock.Mock())
+    @mock.patch('source.redirect_checker.configuration', mock.Mock())
     @mock.patch('source.redirect_checker.dictConfig', mock.Mock())
     @mock.patch('source.redirect_checker.main_loop_function')
     def test_main_loop(self, m_main_loop_function):
@@ -39,7 +38,6 @@ class RedirectCheckerTestCase(unittest.TestCase):
         self.assertTrue(m_main_loop_function.called)
 
     @mock.patch('source.redirect_checker.worker', mock.Mock())
-    #@mock.patch('source.redirect_checker.check_network_status')
     @mock.patch('source.redirect_checker.check_network_status', mock.Mock(return_value=True))
     @mock.patch('source.redirect_checker.spawn_workers')
     def test_main_loop_function_network_access_on(self, m_spawn_workers):
@@ -48,7 +46,6 @@ class RedirectCheckerTestCase(unittest.TestCase):
         config.HTTP_TIMEOUT = 1
         config.WORKER_POOL_SIZE = 5
         active_children = 1
-        #m_check_network_status.return_value = True
         with mock.patch('source.redirect_checker.active_children', lambda: ActiveChildren(active_children)):
             redirect_checker.main_loop_function(config, 10)
         self.assertEqual(m_spawn_workers.called, True)

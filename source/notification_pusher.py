@@ -20,7 +20,7 @@ import requests
 import tarantool
 import tarantool_queue
 
-from lib.utils import create_pidfile, load_config_from_pyfile, daemonize, parse_cmd_args
+from lib.utils import parse_cmd_args, configuration
 
 SIGNAL_EXIT_CODE_OFFSET = 128
 """Коды выхода рассчитываются как 128 + номер сигнала"""
@@ -205,15 +205,7 @@ def main(argv):
     """
     args = parse_cmd_args(argv[1:], 'Push notifications daemon.')
 
-    if args.daemon:
-        daemonize()
-
-    if args.pidfile:
-        create_pidfile(args.pidfile)
-
-    config = load_config_from_pyfile(
-        os.path.realpath(os.path.expanduser(args.config))
-    )
+    config = configuration(args)
 
     patch_all()
 

@@ -134,3 +134,16 @@ def check_network_status(check_url, timeout):
         return True
     except (urllib2.URLError, socket.error, ValueError):
         return False
+
+
+def configuration(args):
+    if args.daemon:
+        daemonize()
+
+    if args.pidfile:
+        create_pidfile(args.pidfile)
+
+    config = load_config_from_pyfile(
+        os.path.realpath(os.path.expanduser(args.config))
+    )
+    return config
