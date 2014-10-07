@@ -159,4 +159,14 @@ class LibInitCase(unittest.TestCase):
             history_types, history_urls, counters = get_redirect_history(m_urls[0], 11)
             self.assertEquals(len(history_urls), 2)
 
+    def test_get_redirect_history_many_redirects(self):
+        m_types = [REDIRECT_META, REDIRECT_META]
+        m_urls = ['url1', 'url2', 'url3']
 
+        with mock.patch('source.lib.get_url', mock.Mock(side_effect=[
+            (m_urls[1], m_types[0], self._get_html_with_redirect(m_urls[1])),
+            (m_urls[2], m_types[1], self._get_html_with_redirect(m_urls[2])),
+            (None, None, '<html></html>')
+        ])):
+            types, urls, counters = get_redirect_history(m_urls[0], timeout=11, max_redirects=1)
+            self.assertEquals(len(urls), 2)
