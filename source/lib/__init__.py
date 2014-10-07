@@ -62,7 +62,7 @@ def check_for_meta(content, url):
                 if len(splitted) != 2:
                     return
                 wait, text = splitted
-                text = text.strip()
+                text = text.strip().lower()
                 m = re.search(r"url\s*=\s*['\"]?([^'\"]+)", text, re.I)
                 if m:
                     meta_url = m.groups()[0]
